@@ -58,11 +58,11 @@
     const named = n.d.k !== 'star';
     const wanted = named || !mobile || (n.active && n.d.l >= 2 && W >= 380);
     const size = named ? (mobile ? 10.5 : 13) : 10.5;
-    const sub = named && n.d.t !== null && n.active && !mobile;
+    const sub = named && n.d.t !== null && n.active; // the count shows on phones too; the header says it is 30 days
     return { named, wanted, size, sub };
   }
 
-  const subText = (n) => `${n.d.t.toLocaleString()} commit${n.d.t === 1 ? '' : 's'} \u00b7 30 days`;
+  const subText = (n) => `${n.d.t.toLocaleString()} commit${n.d.t === 1 ? '' : 's'}`;
 
   // the box a planet takes up: the planet, its ring and moons, and (optionally) its label
   function measure(n) {
@@ -73,7 +73,7 @@
     const ly = R * (n.ring ? 2.1 : 1.35) + sp.size + 3; // label baseline, relative to the planet centre
     ctx.font = `${sp.named ? 600 : 400} ${sp.size}px system-ui, sans-serif`;
     let lw = ctx.measureText(n.d.n).width;
-    if (sp.sub) { ctx.font = `400 ${sp.size - 2}px system-ui, sans-serif`; lw = Math.max(lw, ctx.measureText(subText(n)).width); }
+    if (sp.sub) { ctx.font = `400 ${sp.size - 1.5}px system-ui, sans-serif`; lw = Math.max(lw, ctx.measureText(subText(n)).width); }
     const labelBottom = ly + (sp.sub ? sp.size : 0) + 3;
     n.spec = sp; n.ly = ly;
     n.planetBox = { l: -hw, r: hw, t: -top, b: top };
@@ -269,7 +269,7 @@
       const ly = n.y + n.ly;
       ctx.fillText(n.d.n, n.x, ly);
       if (sp.sub) {
-        ctx.font = `400 ${sp.size - 2}px system-ui, sans-serif`; ctx.fillStyle = 'rgba(200,212,230,.7)';
+        ctx.font = `400 ${sp.size - 1.5}px system-ui, sans-serif`; ctx.fillStyle = 'rgba(200,212,230,.7)';
         ctx.fillText(subText(n), n.x, ly + sp.size);
       }
     }
