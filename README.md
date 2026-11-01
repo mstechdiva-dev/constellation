@@ -11,7 +11,7 @@ The screenshot uses invented sample data.
 - **Planets** are repos I own, public and private. Busy ones glow and sit near the middle. Quiet ones are dim and drift toward the edges.
 - **Moons** are branches. Bigger moons have more commits.
 - **Pulses** are activity: a dot is a commit, a ring is a pull request, a diamond is an issue.
-- **Colors** group repos that belong to the same announced project.
+- **Colors**: the brightest colors mark repos that belong to an announced project. Every other planet gets its own muted color, picked from its name.
 - **Totals** at the top are the last 30 days, updated once a day.
 
 Public repos show their real names and commit messages. Private repos get star names and generic one-line summaries, so the shape of the work shows without the details.

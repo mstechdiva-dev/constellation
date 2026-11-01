@@ -5,6 +5,8 @@
   const PALETTE = ['#38d9f5', '#ffb347', '#a78bfa', '#f472b6', '#5eead4'];
   const NEUTRAL = '#9db0cc';
   const GOLDEN = 2.399963;
+  // planets outside the announced projects get a muted colour picked from their star name, so it says nothing about grouping
+  const MUTED = ['#c8935f', '#b9694f', '#7d9fd0', '#8fb38c', '#d1b06e', '#a08cc4', '#6fb0b3', '#c9808f'];
   const PAD_X = 22, PAD_Y = 12; // breathing room between planets, also covers the drift
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const $ = (id) => document.getElementById(id);
@@ -92,7 +94,7 @@
     const active = [], idle = [];
     data.repos.forEach((r, i) => (r.l > 0 ? active : idle).push(i));
     nodes = data.repos.map((r, i) => {
-      const col = r.c >= 0 ? PALETTE[r.c % PALETTE.length] : NEUTRAL;
+      const col = r.c >= 0 ? PALETTE[r.c % PALETTE.length] : MUTED[hash(r.n) % MUTED.length];
       const radius = (r.l === 0 ? 5 : 7 + r.l * 4.2) * unit * (i === 0 && r.l > 0 ? 1.25 : 1);
       const rnd = rng(hash(r.n));
       const n = {
@@ -166,7 +168,7 @@
   function makePlanet(n) {
     const R = n.R, S = Math.ceil((R * 2 + 6) * DPR), mid = S / 2, rr = R * DPR;
     const r = rng(hash(n.d.n) + 7);
-    const base = n.active ? n.col : mix(n.col, '#4b5563', 0.55);
+    const base = n.active ? n.col : mix(n.col, '#4b5563', 0.4);
     const tex = document.createElement('canvas'); tex.width = S * 2; tex.height = S;
     const g = tex.getContext('2d');
     g.fillStyle = base; g.fillRect(0, 0, S * 2, S);
@@ -203,7 +205,7 @@
     const s = shade.getContext('2d');
     s.save(); s.beginPath(); s.arc(mid, mid, rr, 0, TAU); s.clip();
     const lit = s.createRadialGradient(mid - rr * 0.38, mid - rr * 0.42, rr * 0.05, mid - rr * 0.2, mid - rr * 0.2, rr * 1.0);
-    lit.addColorStop(0, 'rgba(255,255,255,.5)'); lit.addColorStop(0.55, 'rgba(255,255,255,0)');
+    lit.addColorStop(0, 'rgba(255,255,255,.34)'); lit.addColorStop(0.55, 'rgba(255,255,255,0)');
     s.fillStyle = lit; s.fillRect(0, 0, S, S);
     const dark = s.createRadialGradient(mid - rr * 0.5, mid - rr * 0.5, rr * 0.2, mid + rr * 0.15, mid + rr * 0.15, rr * 1.25);
     dark.addColorStop(0, 'rgba(0,0,0,0)'); dark.addColorStop(0.6, 'rgba(0,0,12,.3)'); dark.addColorStop(1, 'rgba(0,0,12,.84)');
@@ -357,7 +359,7 @@
       const frag = document.createDocumentFragment();
       for (const [ri, msg] of data.feed) {
         const r = data.repos[ri]; if (!r) continue;
-        const col = r.c >= 0 ? PALETTE[r.c % PALETTE.length] : NEUTRAL;
+        const col = r.c >= 0 ? PALETTE[r.c % PALETTE.length] : MUTED[hash(r.n) % MUTED.length];
         const row = document.createElement('div'); row.className = 'item';
         const dot = document.createElement('i'); dot.style.background = col; dot.style.boxShadow = `0 0 8px ${col}`;
         const box = document.createElement('div');
