@@ -13,6 +13,7 @@ body { background: radial-gradient(ellipse at 40% 45%, #0f1830 0%, #080d1c 55%, 
 #head { position: fixed; top: 22px; left: 26px; z-index: 2; pointer-events: none; }
 h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: .32em; }
 .sub { margin: 4px 0 14px; color: var(--dim); font-size: 13px; }
+.win { margin: -6px 0 8px; color: var(--dim); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
 .totals { display: flex; gap: 28px; margin: 0; }
 .totals div { min-width: 0; }
 .totals dt { color: var(--dim); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
