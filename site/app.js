@@ -35,7 +35,7 @@
     mobile = W < 768;
     canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
     const feedW = mobile ? 0 : 320;
-    area = { x0: 20, x1: W - feedW - 20, y0: mobile ? 110 : 120, y1: H - (mobile ? Math.max(150, H * 0.24) + 30 : 56) };
+    area = { x0: 20, x1: W - feedW - 20, y0: mobile ? 110 : 120, y1: H - (mobile ? Math.max(150, H * 0.24) + 72 : 56) };
     makeStars();
   }
 
@@ -51,7 +51,7 @@
   }
 
   function layout(data) {
-    const unit = Math.max(0.62, Math.min(1.25, Math.min(area.x1 - area.x0, area.y1 - area.y0) / 620));
+    const unit = Math.max(0.62, Math.min(1.25, Math.min(area.x1 - area.x0, area.y1 - area.y0) / 620)) * (mobile ? 0.7 : 1);
     const cx = (area.x0 + area.x1) / 2, cy = (area.y0 + area.y1) / 2;
     const rx = (area.x1 - area.x0) / 2, ry = (area.y1 - area.y0) / 2;
     const active = [], idle = [];
@@ -79,18 +79,18 @@
       nodes[i].bx = cx + Math.cos(a) * rx * r; nodes[i].by = cy + Math.sin(a) * ry * r;
     });
     // push overlapping planets apart; the hub stays put
-    for (let it = 0; it < 60; it++) {
+    for (let it = 0; it < 200; it++) {
       for (const a of nodes) for (const b of nodes) {
         if (a === b) continue;
-        const dx = b.bx - a.bx, dy = b.by - a.by, d = Math.hypot(dx, dy) || 0.01;
-        const min = (a.R + b.R) * 2.1 + 16;
+        const dx = b.bx - a.bx, dy = b.by - a.by, d = Math.hypot(mobile ? dx * 0.55 : dx, dy) || 0.01; // labels are wide, so on phones count x gaps as tighter
+        const min = (a.R + b.R) * 2.1 + (mobile ? 30 : 16); // room for the label under each planet
         if (d < min) {
-          const push = (min - d) / 2, ux = dx / d, uy = dy / d;
+          const push = (min - d) / 2, ux = (mobile ? dx * 0.55 : dx) / d, uy = dy / d;
           if (a.i !== 0) { a.bx -= ux * push; a.by -= uy * push; }
           if (b.i !== 0) { b.bx += ux * push; b.by += uy * push; }
         }
       }
-      for (const n of nodes) { n.bx = Math.max(area.x0 + n.R * 2, Math.min(area.x1 - n.R * 2, n.bx)); n.by = Math.max(area.y0 + n.R * 2, Math.min(area.y1 - n.R * 2, n.by)); }
+      for (const n of nodes) { const px = n.R * 2 + (mobile ? 48 : 0); n.bx = Math.max(area.x0 + px, Math.min(area.x1 - px, n.bx)); n.by = Math.max(area.y0 + n.R * 2, Math.min(area.y1 - n.R * 2 - (mobile ? 30 : 0), n.by)); }
     }
     nodes.forEach((n) => { n.x = n.bx; n.y = n.by; n.sprite = planetSprite(n); });
     // edges: each active planet to the hub, and to its nearest active neighbour
@@ -186,13 +186,13 @@
     front.forEach(moon);
     // label: named and public repos get a name; busy stars get a small dim one
     const named = n.d.k !== 'star';
-    if (named || (n.active && n.d.l >= 2) || !mobile) {
-      const size = named ? (mobile ? 11 : 13) : 10.5;
+    if (named || (n.active && n.d.l >= 2 && (!mobile || W >= 380)) || !mobile) {
+      const size = named ? (mobile ? 10.5 : 13) : 10.5;
       ctx.font = `${named ? 600 : 400} ${size}px system-ui, sans-serif`; ctx.textAlign = 'center';
       ctx.fillStyle = named ? '#ffffff' : n.active ? 'rgba(200,212,230,.75)' : 'rgba(150,165,190,.4)';
       const ly = n.y + n.R * (n.ring ? 2.1 : 1.35) + size + 3;
       ctx.fillText(n.d.n, n.x, ly);
-      if (named && n.d.t !== null && n.active && (!mobile || n.i === 0)) {
+      if (named && n.d.t !== null && n.active && !mobile) {
         ctx.font = `400 ${size - 2}px system-ui, sans-serif`; ctx.fillStyle = 'rgba(200,212,230,.7)';
         ctx.fillText(`${n.d.t.toLocaleString()} commits · 30 days`, n.x, ly + size);
       }
