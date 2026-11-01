@@ -38,7 +38,7 @@
     mobile = W < 768;
     canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
     const feedW = mobile ? 0 : 320;
-    area = { x0: 20, x1: W - feedW - 20, y0: mobile ? 110 : 120, y1: H - (mobile ? Math.max(150, H * 0.24) + 72 : 56) };
+    area = { x0: 20, x1: W - feedW - 20, y0: mobile ? 130 : 142, y1: H - (mobile ? Math.max(150, H * 0.24) + 72 : 56) };
     makeStars();
   }
 
