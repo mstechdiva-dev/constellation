@@ -1,0 +1,83 @@
+name: Update
+
+on:
+  schedule:
+    - cron: '0 */4 * * *'
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: 'Deploy to Pages. Leave off for a dry run that only uploads data.json for review.'
+        type: boolean
+        default: false
+
+# nothing gets more than read access unless a job below says so
+permissions:
+  contents: read
+
+concurrency:
+  group: update
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # scheduled runs wait until the repo is public, so a private repo never spends minutes
+    if: github.event_name != 'schedule' || github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+
+      - name: Unit tests
+        run: npm test
+
+      # the token is only given to this one step
+      - name: Fetch and build data
+        env:
+          GH_TOKEN: ${{ secrets.GH_FETCH_TOKEN }}
+          STAR_SALT: ${{ secrets.STAR_SALT }}
+          SITE_NAMES: ${{ secrets.SITE_NAMES }}
+          VENTURE_MAP: ${{ secrets.VENTURE_MAP }}
+          ANNOUNCED_VENTURES: ${{ secrets.ANNOUNCED_VENTURES }}
+        run: node scripts/build-data.mjs
+
+      - name: Leak check
+        run: node scripts/leak-check.mjs site/data.json .tmp/leak-ctx.json
+
+      # the sample file is for local previews only
+      - name: Remove sample data
+        run: rm -f site/data.sample.json
+
+      - name: Upload data for review (dry run)
+        if: github.event_name == 'workflow_dispatch' && !inputs.deploy
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: data-for-review
+          path: site/data.json
+          retention-days: 1
+
+      - name: Package site
+        if: github.event_name == 'schedule' || inputs.deploy
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    if: github.event_name == 'schedule' || inputs.deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

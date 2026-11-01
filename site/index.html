@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Constellation</title>
+<meta name="description" content="An animated map of a year of building: every repo as a planet, every commit, pull request and issue as a pulse.">
+<meta name="theme-color" content="#060912">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="sky" aria-label="Animated network of repositories"></canvas>
+
+<header id="head">
+  <h1>CONSTELLATION</h1>
+  <p class="sub">mstechdiva-dev &middot; every repo, public and private</p>
+  <dl class="totals">
+    <div><dt>Commits</dt><dd id="t-c">0</dd></div>
+    <div><dt>Pull requests</dt><dd id="t-p">0</dd></div>
+    <div><dt>Issues</dt><dd id="t-i">0</dd></div>
+  </dl>
+</header>
+
+<ul id="key" aria-label="Key">
+  <li><svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3.2" fill="#fff"/></svg>Commit</li>
+  <li><svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5" fill="none" stroke="#fff" stroke-width="1.6"/></svg>Pull request</li>
+  <li><svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 2.5 13.5 8 8 13.5 2.5 8Z" fill="#fff"/></svg>Issue</li>
+</ul>
+
+<button id="full" type="button" aria-label="Toggle full screen" title="Full screen">
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 6V2h4M12 2h4v4M16 12v4h-4M6 16H2v-4"/></svg>
+</button>
+
+<aside id="feed" aria-label="Activity feed">
+  <h2>ACTIVITY</h2>
+  <div id="feed-scroll"><div id="feed-list"></div></div>
+  <p class="note">Private repos show generic summaries</p>
+</aside>
+
+<p id="empty" hidden>No activity to show yet.</p>
+<noscript><p style="position:fixed;inset:0;display:grid;place-items:center;color:#cbd5e1">This page needs JavaScript.</p></noscript>
+<script src="app.js"></script>
+</body>
+</html>

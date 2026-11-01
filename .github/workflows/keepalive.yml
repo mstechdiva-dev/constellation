@@ -1,0 +1,25 @@
+name: Keepalive
+
+# GitHub pauses scheduled workflows in a public repo after 60 days with no commits.
+# One empty commit a month keeps the schedule running.
+on:
+  schedule:
+    - cron: '17 6 12 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  keepalive:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Empty commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit --allow-empty -m "Keepalive"
+          git push

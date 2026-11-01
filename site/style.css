@@ -1,0 +1,63 @@
+:root {
+  --bg: #060912;
+  --ink: #e6ecf5;
+  --dim: #8896ab;
+  --feed-w: 320px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); overflow: hidden;
+  font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+body { background: radial-gradient(ellipse at 40% 45%, #0f1830 0%, #080d1c 55%, #04060d 100%); }
+#sky { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+#head { position: fixed; top: 22px; left: 26px; z-index: 2; pointer-events: none; }
+h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: .32em; }
+.sub { margin: 4px 0 14px; color: var(--dim); font-size: 13px; }
+.totals { display: flex; gap: 28px; margin: 0; }
+.totals div { min-width: 0; }
+.totals dt { color: var(--dim); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+.totals dd { margin: 2px 0 0; font-size: 30px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+#key { position: fixed; left: 26px; bottom: 22px; z-index: 2; display: flex; gap: 18px; margin: 0; padding: 0; list-style: none;
+  color: var(--dim); font-size: 12px; }
+#key li { display: flex; align-items: center; gap: 6px; }
+
+#full { position: fixed; top: 20px; right: calc(var(--feed-w) + 18px); z-index: 3; width: 34px; height: 34px; display: grid; place-items: center;
+  color: var(--dim); background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); border-radius: 8px; cursor: pointer; }
+#full:hover, #full:focus-visible { color: var(--ink); border-color: rgba(255,255,255,.3); outline: none; }
+
+#feed { position: fixed; top: 0; right: 0; bottom: 0; width: var(--feed-w); z-index: 2; padding: 22px 22px 16px 18px;
+  display: flex; flex-direction: column; background: linear-gradient(90deg, rgba(6,9,18,0), rgba(6,9,18,.72) 22%); }
+#feed h2 { margin: 0 0 10px; font-size: 11px; font-weight: 600; letter-spacing: .24em; color: var(--dim); }
+#feed-scroll { position: relative; flex: 1; overflow: hidden;
+  -webkit-mask-image: linear-gradient(transparent, #000 10%, #000 90%, transparent);
+  mask-image: linear-gradient(transparent, #000 10%, #000 90%, transparent); }
+#feed-list { will-change: transform; }
+#feed-list.run { animation: scroll var(--dur, 300s) linear infinite; }
+@keyframes scroll { to { transform: translateY(-50%); } }
+.item { display: flex; gap: 10px; padding: 9px 0; }
+.item i { flex: none; width: 8px; height: 8px; margin-top: 5px; border-radius: 50%; }
+.item b { display: block; font-weight: 600; font-size: 13px; }
+.item b.named { color: #fff; }
+.item span { display: block; color: #b4c0d2; font-size: 13px; overflow-wrap: anywhere; }
+.note { margin: 10px 0 0; font-size: 11px; color: var(--dim); }
+
+#empty[hidden] { display: none; }
+#empty { position: fixed; inset: 0; display: grid; place-items: center; margin: 0; color: var(--dim); }
+
+@media (max-width: 767px) {
+  :root { --feed-w: 100%; }
+  #head { top: 14px; left: 16px; right: 16px; }
+  h1 { font-size: 17px; }
+  .sub { margin-bottom: 10px; font-size: 12px; }
+  .totals { gap: 18px; }
+  .totals dd { font-size: 22px; }
+  #feed { top: auto; height: 24vh; min-height: 150px; padding: 12px 16px 10px; background: linear-gradient(0deg, rgba(6,9,18,.85), rgba(6,9,18,0)); }
+  #feed h2 { display: none; }
+  #key { left: 16px; bottom: calc(24vh + 8px); gap: 14px; }
+  #full { top: 14px; right: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #feed-list.run { animation: none; }
+  #feed-scroll { overflow-y: auto; }
+}

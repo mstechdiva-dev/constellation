@@ -1,0 +1,7 @@
+node_modules/
+.tmp/
+.env
+.env.*
+# the real output is built by the Action and deployed to Pages, never committed
+site/data.json
+*.log

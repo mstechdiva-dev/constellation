@@ -1,0 +1,16 @@
+{
+  "name": "constellation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "An animated network graph of GitHub activity",
+  "type": "module",
+  "license": "MIT",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "test": "node --test scripts/constellation.test.mjs",
+    "build:data": "node scripts/build-data.mjs",
+    "leak-check": "node scripts/leak-check.mjs site/data.json .tmp/leak-ctx.json",
+    "sample": "node scripts/make-sample.mjs",
+    "preview": "node scripts/serve.mjs"
+  }
+}
