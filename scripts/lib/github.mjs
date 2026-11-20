@@ -5,25 +5,49 @@ const API = 'https://api.github.com';
 const MAX_HISTORY_PAGES = 10; // 100 commits per page
 const KIND_LOOKUPS_PER_REPO = 25; // file kinds are only needed for lines shown in the feed
 
+const MAX_ATTEMPTS = 5;
+const wait = (attempt) => new Promise((r) => setTimeout(r, 2000 * 2 ** attempt));
+
 async function call(token, path, body) {
-  for (let attempt = 0; attempt < 4; attempt++) {
-    const res = await fetch(API + path, {
-      method: body ? 'POST' : 'GET',
-      headers: {
-        authorization: `Bearer ${token}`,
-        accept: 'application/vnd.github+json',
-        'x-github-api-version': '2022-11-28',
-        'user-agent': 'constellation',
-        ...(body ? { 'content-type': 'application/json' } : {}),
-      },
-      body: body ? JSON.stringify(body) : undefined,
-    });
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    let res;
+    try {
+      res = await fetch(API + path, {
+        method: body ? 'POST' : 'GET',
+        headers: {
+          authorization: `Bearer ${token}`,
+          accept: 'application/vnd.github+json',
+          'x-github-api-version': '2022-11-28',
+          'user-agent': 'constellation',
+          ...(body ? { 'content-type': 'application/json' } : {}),
+        },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+    } catch {
+      // network hiccup: try again
+      await wait(attempt);
+      continue;
+    }
     if (res.status >= 500 || res.status === 429) {
-      await new Promise((r) => setTimeout(r, 1500 * (attempt + 1)));
+      await wait(attempt);
       continue;
     }
     if (!res.ok) throw new Error(`GitHub API returned ${res.status} for ${body ? 'a GraphQL call' : 'a REST call'}`);
-    return res.json();
+    // GitHub sometimes sends a 200 with an empty or cut-off body when a query times out
+    const text = await res.text().catch(() => '');
+    let out;
+    try {
+      out = JSON.parse(text);
+    } catch {
+      await wait(attempt);
+      continue;
+    }
+    // a GraphQL timeout also comes back as a 200 with an error that has no type
+    if (body && out.errors?.length && !out.data && out.errors.every((e) => !e.type)) {
+      await wait(attempt);
+      continue;
+    }
+    return out;
   }
   throw new Error('GitHub API kept failing after retries');
 }
@@ -34,7 +58,7 @@ async function gql(token, query, variables) {
   return out.data;
 }
 
-const REPOS_Q = `query($after:String){viewer{login repositories(first:50,after:$after,ownerAffiliations:OWNER,orderBy:{field:PUSHED_AT,direction:DESC}){
+const REPOS_Q = `query($after:String){viewer{login repositories(first:20,after:$after,ownerAffiliations:OWNER,orderBy:{field:PUSHED_AT,direction:DESC}){
   pageInfo{hasNextPage endCursor}
   nodes{id name isPrivate isFork isArchived pushedAt owner{login}
     defaultBranchRef{name}
@@ -112,7 +136,7 @@ export async function fetchRaw(token, now = new Date(), windowDays = 30, log = (
   const nodes = [];
   let viewer = '';
   let after = null;
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 25; i++) {
     const d = await gql(token, REPOS_Q, { after });
     viewer = d.viewer.login;
     nodes.push(...d.viewer.repositories.nodes);
